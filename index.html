@@ -160,7 +160,7 @@
           <input type="text" id="nome" required />
         </label><br><br>
         <label>Quantidade:
-          <input type="number" id="quantidade" required />
+          <input type="number" id="quantidade" required min="1" />
         </label><br><br>
         <label>Unidade:
           <select id="unidade">
@@ -215,7 +215,7 @@
       document.getElementById(id).classList.remove("hidden");
     }
 
-    // Salvar produto no localStorage
+    // Função para salvar o produto no localStorage
     function salvarProduto(produto) {
       let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
       produtos.push(produto);
@@ -224,7 +224,7 @@
       showSection("estoque");
     }
 
-    // Listar todos os produtos
+    // Função para listar todos os produtos
     function listarEstoque(filtrados = JSON.parse(localStorage.getItem("produtos")) || []) {
       const tabela = document.getElementById("tabelaEstoque").getElementsByTagName("tbody")[0];
       tabela.innerHTML = "";
@@ -239,13 +239,16 @@
         // Definir classe 'low-stock' para produtos próximos ao vencimento
         const lowStockClass = diffDays <= 30 ? 'low-stock' : '';
 
+        // Formatando data para PT-BR
+        const validadeFormatada = validade.toLocaleDateString('pt-BR');
+
         tr.classList.add(lowStockClass);
 
         tr.innerHTML = `
           <td>${produto.nome}</td>
           <td>${produto.quantidade}</td>
           <td>${produto.unidade}</td>
-          <td>${produto.validade}</td>
+          <td>${validadeFormatada}</td>
           <td><img src="${produto.foto}" alt="Foto do produto" width="50"></td>
           <td>
             <button onclick="editarProduto(${index})">Editar</button>
@@ -256,7 +259,7 @@
       });
     }
 
-    // Excluir produto
+    // Função para excluir produto
     function excluirProduto(index) {
       let produtos = JSON.parse(localStorage.getItem("produtos"));
       produtos.splice(index, 1);
