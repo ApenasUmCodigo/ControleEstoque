@@ -1,252 +1,315 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Estoque</title>
   <style>
+    /* Estilo geral da página */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #f8a5c2;
+      color: white;
+      text-align: center;
       padding: 20px;
     }
-    h1 {
-      text-align: center;
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
     }
-    .form-container {
+
+    main {
+      padding: 20px;
+    }
+
+    /* Container de botões */
+    .buttons-container {
+      margin-bottom: 20px;
       display: flex;
-      flex-direction: column;
-      max-width: 300px;
-      margin: 0 auto;
+      justify-content: center;
+      gap: 20px;
     }
-    .form-container label {
-      margin-bottom: 10px;
-    }
-    .form-container input,
-    .form-container select {
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
+
+    .buttons-container button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #f8a5c2;
       border: none;
-      border-radius: 5px;
+      color: white;
       cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
     }
-    button:hover {
-      background-color: #45a049;
+
+    .buttons-container button:hover {
+      background-color: #f78fb3;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-    }
-    .alert {
-      color: red;
+
+    /* Estilo do formulário */
+    form label {
+      display: block;
+      margin: 10px 0 5px;
       font-weight: bold;
     }
+
+    form input, form select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #f2a3b6;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    form button {
+      padding: 10px 20px;
+      background-color: #f78fb3;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    form button:hover {
+      background-color: #f8a5c2;
+    }
+
+    /* Tabela */
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #f78fb3;
+      color: white;
+    }
+
+    table td img {
+      width: 50px;
+      border-radius: 5px;
+    }
+
+    .low-stock {
+      background-color: #f8d7da;
+      font-weight: bold;
+      color: #721c24;
+    }
+
+    /* Estilo dos botões na tabela */
+    .btn-secundario {
+      background-color: #f8a5c2;
+      border: none;
+      padding: 5px 10px;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-secundario:hover {
+      background-color: #f78fb3;
+    }
+
+    /* Esconder seções */
     .hidden {
       display: none;
     }
-    .vencendo {
-      background-color: #ffeb3b; /* Amarelo para produtos próximos ao vencimento */
-    }
-    .expirado {
-      background-color: #f44336; /* Vermelho para produtos vencidos */
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #f8a5c2;
+      color: white;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Sistema de Controle de Estoque</h1>
+  </header>
 
-  <h1>Controle de Estoque</h1>
+  <main>
+    <div class="buttons-container">
+      <button onclick="showSection('cadastro')">Cadastrar Produto</button>
+      <button onclick="showSection('estoque')">Consulta Estoque</button>
+    </div>
 
-  <div class="form-container">
-    <label for="produto">Produto:</label>
-    <input type="text" id="produto" required>
-    
-    <label for="quantidade">Quantidade:</label>
-    <input type="number" id="quantidade" required>
-    
-    <label for="validade">Validade:</label>
-    <input type="date" id="validade" required>
-    
-    <button onclick="adicionarProduto()">Adicionar Produto</button>
-    <button onclick="atualizarProduto()" class="hidden" id="btnSalvar">Salvar Edição</button>
-  </div>
+    <div id="cadastro" class="hidden">
+      <h2>Cadastrar Produto</h2>
+      <form id="produtoForm">
+        <label>Produto:
+          <input type="text" id="nome" required />
+        </label><br><br>
+        <label>Quantidade:
+          <input type="number" id="quantidade" required />
+        </label><br><br>
+        <label>Unidade:
+          <select id="unidade">
+            <option value="Pacote">Pacote</option>
+            <option value="Unidade">Unidade</option>
+          </select>
+        </label><br><br>
+        <label>Validade:
+          <input type="date" id="validade" required />
+        </label><br><br>
+        <label>Foto:
+          <input type="file" id="foto" accept="image/*" />
+        </label><br><br>
+        <div>
+          <button type="submit">Salvar Produto</button>
+          <button type="button" class="btn-secundario" onclick="showSection('estoque')">Voltar</button>
+        </div>
+      </form>
+    </div>
 
-  <h2>Estoque</h2>
+    <div id="estoque" class="hidden">
+      <h2>Consulta de Estoque</h2>
+      <button onclick="filtrarValidade()">Filtrar: Próximos ao Vencimento (30 dias)</button>
+      <button onclick="listarEstoque()" class="btn-secundario">Listar Todos</button>
+      <table id="tabelaEstoque">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Unidade</th>
+            <th>Validade</th>
+            <th>Foto</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button class="btn-secundario" onclick="showSection('cadastro')">Voltar</button>
+    </div>
+  </main>
 
-  <!-- Botões de filtro e exibição -->
-  <button onclick="filtrarProximosVencimentos()">Filtrar: Próximos ao Vencimento (30 dias)</button>
-  <button onclick="exibirTodos()">Exibir Todos</button>
-
-  <table id="estoque">
-    <thead>
-      <tr>
-        <th>Produto</th>
-        <th>Quantidade</th>
-        <th>Validade</th>
-        <th>Ação</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Os produtos serão listados aqui -->
-    </tbody>
-  </table>
-
-  <div id="alerta" class="alert"></div>
+  <footer>
+    <p>© 2025 Controle de Estoque</p>
+  </footer>
 
   <script>
-    let produtos = [];
-    let produtoEditandoIndex = -1;
-    let produtosFiltrados = [];
-
-    // Função para adicionar produto
-    function adicionarProduto() {
-      const nome = document.getElementById("produto").value;
-      const quantidade = parseInt(document.getElementById("quantidade").value);
-      const validade = document.getElementById("validade").value;
-
-      if (!nome || !quantidade || !validade) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      // Adiciona o produto à lista
-      produtos.push({ nome, quantidade, validade });
-      
-      // Limpa os campos de entrada
-      document.getElementById("produto").value = '';
-      document.getElementById("quantidade").value = '';
-      document.getElementById("validade").value = '';
-
-      // Atualiza a tabela de estoque
-      listarEstoque();
+    // Função para exibir as seções
+    function showSection(id) {
+      document.querySelectorAll(".hidden").forEach(section => {
+        section.classList.add("hidden");
+      });
+      document.getElementById(id).classList.remove("hidden");
     }
 
-    // Função para listar produtos no estoque
-    function listarEstoque() {
-      const tabela = document.getElementById("estoque").getElementsByTagName("tbody")[0];
+    // Salvar produto no localStorage
+    function salvarProduto(produto) {
+      let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+      produtos.push(produto);
+      localStorage.setItem("produtos", JSON.stringify(produtos));
+      listarEstoque();
+      showSection("estoque");
+    }
+
+    // Listar todos os produtos
+    function listarEstoque(filtrados = JSON.parse(localStorage.getItem("produtos")) || []) {
+      const tabela = document.getElementById("tabelaEstoque").getElementsByTagName("tbody")[0];
       tabela.innerHTML = "";
 
-      const dataAtual = new Date();
-      const proximosVencimentos = [];
-
-      // Define o array de produtos a ser mostrado (com ou sem filtro)
-      const produtosExibidos = produtosFiltrados.length > 0 ? produtosFiltrados : produtos;
-
-      produtosExibidos.forEach((produto, index) => {
-        const validade = new Date(produto.validade);
-        const diasParaVencimento = Math.floor((validade - dataAtual) / (1000 * 60 * 60 * 24));
-
+      filtrados.forEach((produto, index) => {
         const tr = document.createElement("tr");
+        const validade = new Date(produto.validade);
+        const dataAtual = new Date();
+        const diffTime = validade - dataAtual;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Verifica a condição de vencimento para mudar a cor da linha
-        if (diasParaVencimento <= 0) {
-          tr.classList.add('expirado'); // Produto vencido
-        } else if (diasParaVencimento <= 30) {
-          tr.classList.add('vencendo'); // Produto próximo ao vencimento
-        }
+        // Definir classe 'low-stock' para produtos próximos ao vencimento
+        const lowStockClass = diffDays <= 30 ? 'low-stock' : '';
+
+        tr.classList.add(lowStockClass);
 
         tr.innerHTML = `
           <td>${produto.nome}</td>
           <td>${produto.quantidade}</td>
+          <td>${produto.unidade}</td>
           <td>${produto.validade}</td>
+          <td><img src="${produto.foto}" alt="Foto do produto" width="50"></td>
           <td>
-            <button onclick="excluirProduto(${index})">Excluir</button>
             <button onclick="editarProduto(${index})">Editar</button>
+            <button onclick="excluirProduto(${index})">Excluir</button>
           </td>
         `;
         tabela.appendChild(tr);
-
-        // Verifica se o produto está prestes a vencer (30 dias)
-        if (diasParaVencimento <= 30 && diasParaVencimento >= 0) {
-          proximosVencimentos.push(`${produto.nome} vence em ${diasParaVencimento} dias.`);
-        }
       });
-
-      // Exibe alerta de vencimento
-      if (proximosVencimentos.length > 0) {
-        document.getElementById("alerta").innerHTML = `Alerta: ${proximosVencimentos.join(', ')}`;
-      } else {
-        document.getElementById("alerta").innerHTML = "";
-      }
     }
 
-    // Função para excluir produto
+    // Excluir produto
     function excluirProduto(index) {
-      produtos.splice(index, 1); // Remove produto
+      let produtos = JSON.parse(localStorage.getItem("produtos"));
+      produtos.splice(index, 1);
+      localStorage.setItem("produtos", JSON.stringify(produtos));
       listarEstoque();
     }
 
-    // Função para editar produto
-    function editarProduto(index) {
-      const produto = produtos[index];
-
-      // Preenche os campos com os dados do produto
-      document.getElementById("produto").value = produto.nome;
-      document.getElementById("quantidade").value = produto.quantidade;
-      document.getElementById("validade").value = produto.validade;
-
-      // Mostra o botão de salvar
-      document.getElementById("btnSalvar").classList.remove("hidden");
-      produtoEditandoIndex = index;
-    }
-
-    // Função para salvar a edição do produto
-    function atualizarProduto() {
-      const nome = document.getElementById("produto").value;
-      const quantidade = parseInt(document.getElementById("quantidade").value);
-      const validade = document.getElementById("validade").value;
-
-      if (!nome || !quantidade || !validade) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      // Atualiza o produto na lista
-      produtos[produtoEditandoIndex] = { nome, quantidade, validade };
-
-      // Limpa os campos
-      document.getElementById("produto").value = '';
-      document.getElementById("quantidade").value = '';
-      document.getElementById("validade").value = '';
-
-      // Oculta o botão de salvar
-      document.getElementById("btnSalvar").classList.add("hidden");
-
-      // Atualiza a tabela
-      listarEstoque();
-    }
-
-    // Função para filtrar produtos próximos ao vencimento
-    function filtrarProximosVencimentos() {
-      const dataAtual = new Date();
-      produtosFiltrados = produtos.filter(produto => {
+    // Filtrar produtos próximos ao vencimento (30 dias)
+    function filtrarValidade() {
+      const produtos = JSON.parse(localStorage.getItem("produtos"));
+      const produtosProximos = produtos.filter((produto) => {
         const validade = new Date(produto.validade);
-        const diasParaVencimento = Math.floor((validade - dataAtual) / (1000 * 60 * 60 * 24));
-        return diasParaVencimento <= 30 && diasParaVencimento >= 0;
+        const dataAtual = new Date();
+        const diffTime = validade - dataAtual;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 30;
       });
-
-      listarEstoque();
+      listarEstoque(produtosProximos);
     }
 
-    // Função para exibir todos os produtos
-    function exibirTodos() {
-      produtosFiltrados = [];
-      listarEstoque();
-    }
+    // Submissão do formulário de cadastro
+    document.getElementById("produtoForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const nome = document.getElementById("nome").value;
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const unidade = document.getElementById("unidade").value;
+      const validade = document.getElementById("validade").value;
+      const fotoInput = document.getElementById("foto");
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const produto = {
+          nome,
+          quantidade,
+          unidade,
+          validade,
+          foto: reader.result || ""
+        };
+
+        salvarProduto(produto);
+        document.getElementById("produtoForm").reset();
+        showSection("estoque");
+      };
+
+      if (fotoInput.files.length > 0) {
+        reader.readAsDataURL(fotoInput.files[0]);
+      } else {
+        reader.onload();
+      }
+    });
+
+    // Inicializa a lista de produtos
+    listarEstoque();
   </script>
-
 </body>
 </html>
