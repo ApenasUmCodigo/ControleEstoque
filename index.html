@@ -229,34 +229,40 @@
       const tabela = document.getElementById("tabelaEstoque").getElementsByTagName("tbody")[0];
       tabela.innerHTML = "";
 
-      filtrados.forEach((produto, index) => {
+      if (filtrados.length === 0) {
         const tr = document.createElement("tr");
-        const validade = new Date(produto.validade);
-        const dataAtual = new Date();
-        const diffTime = validade - dataAtual;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        // Definir classe 'low-stock' para produtos próximos ao vencimento
-        const lowStockClass = diffDays <= 30 ? 'low-stock' : '';
-
-        // Formatando data para PT-BR
-        const validadeFormatada = validade.toLocaleDateString('pt-BR');
-
-        tr.classList.add(lowStockClass);
-
-        tr.innerHTML = `
-          <td>${produto.nome}</td>
-          <td>${produto.quantidade}</td>
-          <td>${produto.unidade}</td>
-          <td>${validadeFormatada}</td>
-          <td><img src="${produto.foto}" alt="Foto do produto" width="50"></td>
-          <td>
-            <button onclick="editarProduto(${index})">Editar</button>
-            <button onclick="excluirProduto(${index})">Excluir</button>
-          </td>
-        `;
+        tr.innerHTML = "<td colspan='6' style='text-align: center;'>Nenhum produto cadastrado.</td>";
         tabela.appendChild(tr);
-      });
+      } else {
+        filtrados.forEach((produto, index) => {
+          const tr = document.createElement("tr");
+          const validade = new Date(produto.validade);
+          const dataAtual = new Date();
+          const diffTime = validade - dataAtual;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          // Definir classe 'low-stock' para produtos próximos ao vencimento
+          const lowStockClass = diffDays <= 30 ? 'low-stock' : '';
+
+          // Formatando data para PT-BR
+          const validadeFormatada = validade.toLocaleDateString('pt-BR');
+
+          tr.classList.add(lowStockClass);
+
+          tr.innerHTML = `
+            <td>${produto.nome}</td>
+            <td>${produto.quantidade}</td>
+            <td>${produto.unidade}</td>
+            <td>${validadeFormatada}</td>
+            <td><img src="${produto.foto}" alt="Foto do produto" width="50"></td>
+            <td>
+              <button onclick="editarProduto(${index})">Editar</button>
+              <button onclick="excluirProduto(${index})">Excluir</button>
+            </td>
+          `;
+          tabela.appendChild(tr);
+        });
+      }
     }
 
     // Função para excluir produto
@@ -267,7 +273,7 @@
       listarEstoque();
     }
 
-    // Filtrar produtos próximos ao vencimento (30 dias)
+    // Função para filtrar produtos próximos ao vencimento
     function filtrarValidade() {
       const produtos = JSON.parse(localStorage.getItem("produtos"));
       const produtosProximos = produtos.filter((produto) => {
@@ -311,7 +317,7 @@
       }
     });
 
-    // Inicializa a lista de produtos
+    // Inicializa a lista de produtos ao carregar a página
     listarEstoque();
   </script>
 </body>
