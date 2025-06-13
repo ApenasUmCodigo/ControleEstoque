@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Estoque</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .form-container label {
+      margin-bottom: 10px;
+    }
+    .form-container input,
+    .form-container select {
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    .alert {
+      color: red;
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    .vencendo {
+      background-color: #ffeb3b; /* Amarelo para produtos próximos ao vencimento */
+    }
+    .expirado {
+      background-color: #f44336; /* Vermelho para produtos vencidos */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Controle de Estoque</h1>
+
+  <div class="form-container">
+    <label for="produto">Produto:</label>
+    <input type="text" id="produto" required>
+    
+    <label for="quantidade">Quantidade:</label>
+    <input type="number" id="quantidade" required>
+    
+    <label for="validade">Validade:</label>
+    <input type="date" id="validade" required>
+    
+    <button onclick="adicionarProduto()">Adicionar Produto</button>
+    <button onclick="atualizarProduto()" class="hidden" id="btnSalvar">Salvar Edição</button>
+  </div>
+
+  <h2>Estoque</h2>
+
+  <!-- Botões de filtro e exibição -->
+  <button onclick="filtrarProximosVencimentos()">Filtrar: Próximos ao Vencimento (30 dias)</button>
+  <button onclick="exibirTodos()">Exibir Todos</button>
+
+  <table id="estoque">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Validade</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Os produtos serão listados aqui -->
+    </tbody>
+  </table>
+
+  <div id="alerta" class="alert"></div>
+
+  <script>
+    let produtos = [];
+    let produtoEditandoIndex = -1;
+    let produtosFiltrados = [];
+
+    // Função para adicionar produto
+    function adicionarProduto() {
+      const nome = document.getElementById("produto").value;
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const validade = document.getElementById("validade").value;
+
+      if (!nome || !quantidade || !validade) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      // Adiciona o produto à lista
+      produtos.push({ nome, quantidade, validade });
+      
+      // Limpa os campos de entrada
+      document.getElementById("produto").value = '';
+      document.getElementById("quantidade").value = '';
+      document.getElementById("validade").value = '';
+
+      // Atualiza a tabela de estoque
+      listarEstoque();
+    }
+
+    // Função para listar produtos no estoque
+    function listarEstoque() {
+      const tabela = document.getElementById("estoque").getElementsByTagName("tbody")[0];
+      tabela.innerHTML = "";
+
+      const dataAtual = new Date();
+      const proximosVencimentos = [];
+
+      // Define o array de produtos a ser mostrado (com ou sem filtro)
+      const produtosExibidos = produtosFiltrados.length > 0 ? produtosFiltrados : produtos;
+
+      produtosExibidos.forEach((produto, index) => {
+        const validade = new Date(produto.validade);
+        const diasParaVencimento = Math.floor((validade - dataAtual) / (1000 * 60 * 60 * 24));
+
+        const tr = document.createElement("tr");
+
+        // Verifica a condição de vencimento para mudar a cor da linha
+        if (diasParaVencimento <= 0) {
+          tr.classList.add('expirado'); // Produto vencido
+        } else if (diasParaVencimento <= 30) {
+          tr.classList.add('vencendo'); // Produto próximo ao vencimento
+        }
+
+        tr.innerHTML = `
+          <td>${produto.nome}</td>
+          <td>${produto.quantidade}</td>
+          <td>${produto.validade}</td>
+          <td>
+            <button onclick="excluirProduto(${index})">Excluir</button>
+            <button onclick="editarProduto(${index})">Editar</button>
+          </td>
+        `;
+        tabela.appendChild(tr);
+
+        // Verifica se o produto está prestes a vencer (30 dias)
+        if (diasParaVencimento <= 30 && diasParaVencimento >= 0) {
+          proximosVencimentos.push(`${produto.nome} vence em ${diasParaVencimento} dias.`);
+        }
+      });
+
+      // Exibe alerta de vencimento
+      if (proximosVencimentos.length > 0) {
+        document.getElementById("alerta").innerHTML = `Alerta: ${proximosVencimentos.join(', ')}`;
+      } else {
+        document.getElementById("alerta").innerHTML = "";
+      }
+    }
+
+    // Função para excluir produto
+    function excluirProduto(index) {
+      produtos.splice(index, 1); // Remove produto
+      listarEstoque();
+    }
+
+    // Função para editar produto
+    function editarProduto(index) {
+      const produto = produtos[index];
+
+      // Preenche os campos com os dados do produto
+      document.getElementById("produto").value = produto.nome;
+      document.getElementById("quantidade").value = produto.quantidade;
+      document.getElementById("validade").value = produto.validade;
+
+      // Mostra o botão de salvar
+      document.getElementById("btnSalvar").classList.remove("hidden");
+      produtoEditandoIndex = index;
+    }
+
+    // Função para salvar a edição do produto
+    function atualizarProduto() {
+      const nome = document.getElementById("produto").value;
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const validade = document.getElementById("validade").value;
+
+      if (!nome || !quantidade || !validade) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      // Atualiza o produto na lista
+      produtos[produtoEditandoIndex] = { nome, quantidade, validade };
+
+      // Limpa os campos
+      document.getElementById("produto").value = '';
+      document.getElementById("quantidade").value = '';
+      document.getElementById("validade").value = '';
+
+      // Oculta o botão de salvar
+      document.getElementById("btnSalvar").classList.add("hidden");
+
+      // Atualiza a tabela
+      listarEstoque();
+    }
+
+    // Função para filtrar produtos próximos ao vencimento
+    function filtrarProximosVencimentos() {
+      const dataAtual = new Date();
+      produtosFiltrados = produtos.filter(produto => {
+        const validade = new Date(produto.validade);
+        const diasParaVencimento = Math.floor((validade - dataAtual) / (1000 * 60 * 60 * 24));
+        return diasParaVencimento <= 30 && diasParaVencimento >= 0;
+      });
+
+      listarEstoque();
+    }
+
+    // Função para exibir todos os produtos
+    function exibirTodos() {
+      produtosFiltrados = [];
+      listarEstoque();
+    }
+  </script>
+
+</body>
+</html>
