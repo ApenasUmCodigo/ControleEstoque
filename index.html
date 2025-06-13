@@ -36,6 +36,7 @@
       display: flex;
       justify-content: center;
       gap: 20px;
+      flex-wrap: wrap;
     }
 
     .buttons-container button {
@@ -140,6 +141,17 @@
       color: white;
       margin-top: 20px;
     }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .buttons-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      form label, form input, form select, form button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -207,6 +219,8 @@
   </footer>
 
   <script>
+    let produtoEditando = null;
+
     // Função para exibir as seções
     function showSection(id) {
       document.querySelectorAll(".hidden").forEach(section => {
@@ -215,13 +229,20 @@
       document.getElementById(id).classList.remove("hidden");
     }
 
-    // Função para salvar o produto no localStorage
+    // Função para salvar ou atualizar o produto no localStorage
     function salvarProduto(produto) {
       let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-      produtos.push(produto);
+      if (produtoEditando !== null) {
+        // Atualiza o produto que está sendo editado
+        produtos[produtoEditando] = produto;
+      } else {
+        // Adiciona novo produto
+        produtos.push(produto);
+      }
       localStorage.setItem("produtos", JSON.stringify(produtos));
       listarEstoque();  // Lista todos os produtos após salvar
       showSection("estoque");
+      produtoEditando = null;
     }
 
     // Função para listar todos os produtos
@@ -274,6 +295,17 @@
       listarEstoque();
     }
 
+    // Função para editar produto
+    function editarProduto(index) {
+      const produto = JSON.parse(localStorage.getItem("produtos"))[index];
+      document.getElementById("nome").value = produto.nome;
+      document.getElementById("quantidade").value = produto.quantidade;
+      document.getElementById("unidade").value = produto.unidade;
+      document.getElementById("validade").value = produto.validade;
+      produtoEditando = index;
+      showSection('cadastro');
+    }
+
     // Função para filtrar produtos próximos ao vencimento
     function filtrarValidade() {
       const produtos = JSON.parse(localStorage.getItem("produtos"));
@@ -295,6 +327,18 @@
       const unidade = document.getElementById("unidade").value;
       const validade = document.getElementById("validade").value;
       const fotoInput = document.getElementById("foto");
+
+      // Validação da foto
+      const fotoArquivo = fotoInput.files[0];
+      if (fotoArquivo && !['image/jpeg', 'image/png'].includes(fotoArquivo.type)) {
+        alert("A foto deve ser JPG ou PNG.");
+        return;
+      }
+
+      if (fotoArquivo && fotoArquivo.size > 2 * 1024 * 1024) {
+        alert("A foto deve ter no máximo 2MB.");
+        return;
+      }
 
       const reader = new FileReader();
       reader.onload = function () {
