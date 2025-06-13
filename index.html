@@ -220,21 +220,22 @@
       let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
       produtos.push(produto);
       localStorage.setItem("produtos", JSON.stringify(produtos));
-      listarEstoque();
+      listarEstoque();  // Lista todos os produtos após salvar
       showSection("estoque");
     }
 
     // Função para listar todos os produtos
-    function listarEstoque(filtrados = JSON.parse(localStorage.getItem("produtos")) || []) {
+    function listarEstoque(filtrados = null) {
+      const produtos = filtrados || JSON.parse(localStorage.getItem("produtos")) || [];
       const tabela = document.getElementById("tabelaEstoque").getElementsByTagName("tbody")[0];
       tabela.innerHTML = "";
 
-      if (filtrados.length === 0) {
+      if (produtos.length === 0) {
         const tr = document.createElement("tr");
         tr.innerHTML = "<td colspan='6' style='text-align: center;'>Nenhum produto cadastrado.</td>";
         tabela.appendChild(tr);
       } else {
-        filtrados.forEach((produto, index) => {
+        produtos.forEach((produto, index) => {
           const tr = document.createElement("tr");
           const validade = new Date(produto.validade);
           const dataAtual = new Date();
